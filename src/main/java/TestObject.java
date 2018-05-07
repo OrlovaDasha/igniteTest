@@ -5,6 +5,9 @@ public class TestObject {
     String name;
     String description;
 
+    public TestObject() {
+    }
+
     public TestObject(Long id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -48,5 +51,14 @@ public class TestObject {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, description);
+    }
+
+    @Override
+    public String toString() {
+        return "TestObject{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

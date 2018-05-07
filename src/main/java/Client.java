@@ -26,14 +26,9 @@ public class Client {
             try (IgniteCache<Long, TestObject> cache = ignite.getOrCreateCache(testObjectCacheConf)) {
 
                 try (IgniteDataStreamer<Long, TestObject> stream = ignite.dataStreamer(cache.getName())) {
-
-
-                    for (int i = 1; i <= 1000; i++) {
-                        Long idx = RANDOM.nextLong();
-
-                        stream.addData(idx, new TestObject(idx, "name" + idx, "description"));
-                        if (i % 500 == 0)
-                            System.out.println("Number of tuples streamed into Ignite: " + i);
+                    for (Long i = 1L; i <= 1_000_000; i++) {
+                        stream.addData(i, new TestObject(i, "name" + i, "description"));
+                        System.out.println(i);
                     }
                 }
             }

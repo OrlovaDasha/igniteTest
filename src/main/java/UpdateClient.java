@@ -11,8 +11,9 @@ public class UpdateClient {
         try (Ignite ignite = Ignition.start("example-ignite.xml")) {
             try(IgniteCache<Long, TestObject> cache = ignite.getOrCreateCache(CACHE_NAME)) {
                 try (IgniteDataStreamer<Long, TestObject> stream = ignite.dataStreamer(CACHE_NAME)) {
-                    for (long i = 100; i < 120; i++) {
-                        stream.addData(i, new TestObject(i, "name" + i, "description"));
+                    stream.allowOverwrite(true);
+                    for (long i = 0L; i < 100; i++) {
+                        stream.addData(i, new TestObject(i, "name" + i, "description" + i));
                     }
                 }
             }

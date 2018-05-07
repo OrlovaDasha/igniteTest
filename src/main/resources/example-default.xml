@@ -29,15 +29,15 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util.xsd">
     <bean abstract="true" id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
-        <property name="dataStorageConfiguration">
-            <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
-                <property name="defaultDataRegionConfiguration">
-                    <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
-                        <property name="persistenceEnabled" value="true"/>
-                    </bean>
-                </property>
-            </bean>
-        </property>
+        <!--<property name="dataStorageConfiguration">-->
+            <!--<bean class="org.apache.ignite.configuration.DataStorageConfiguration">-->
+                <!--<property name="defaultDataRegionConfiguration">-->
+                    <!--<bean class="org.apache.ignite.configuration.DataRegionConfiguration">-->
+                        <!--<property name="persistenceEnabled" value="true"/>-->
+                    <!--</bean>-->
+                <!--</property>-->
+            <!--</bean>-->
+        <!--</property>-->
 
         <!-- Set to true to enable distributed class loading for examples, default is false. -->
         <property name="peerClassLoadingEnabled" value="true"/>
