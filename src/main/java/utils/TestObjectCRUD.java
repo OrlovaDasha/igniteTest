@@ -1,11 +1,10 @@
+package utils;
+
 import com.mongodb.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import domain.TestObject;
 import org.bson.Document;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class TestObjectCRUD {
 
@@ -21,9 +20,9 @@ public class TestObjectCRUD {
 
     public void add(TestObject testObject){
         BasicDBObject document = new BasicDBObject();
-        document.put("id", testObject.id);
-        document.put("name", testObject.name);
-        document.put("description", testObject.description);
+        document.put("id", testObject.getId());
+        document.put("name", testObject.getName());
+        document.put("description", testObject.getDescription());
         table.insertOne(document);
     }
 
@@ -37,23 +36,6 @@ public class TestObjectCRUD {
         testObject.setName(String.valueOf(result.get("name")));
         testObject.setDescription(String.valueOf(result.get("description")));
         return testObject;
-    }
-
-    public Map<Long, TestObject> getAll(){
-        Map<Long, TestObject> testObjectMap = new HashMap<>();
-        FindIterable<Document> cursor = table.find();
-        Iterator it = cursor.iterator();
-
-        while (it.hasNext()) {
-            System.out.println(it.next());
-            DBObject dbObject = (DBObject) it.next();
-            TestObject testObject = new TestObject();
-            testObject.setId(Long.valueOf(String.valueOf(dbObject.get("id"))));
-            testObject.setName(String.valueOf(dbObject.get("name")));
-            testObject.setDescription(String.valueOf(dbObject.get("description")));
-            testObjectMap.put(testObject.id, testObject);
-        }
-        return testObjectMap;
     }
 
     public static TestObject fromDocument(Document document) {

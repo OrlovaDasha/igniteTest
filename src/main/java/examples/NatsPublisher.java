@@ -1,3 +1,5 @@
+package examples;
+
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 

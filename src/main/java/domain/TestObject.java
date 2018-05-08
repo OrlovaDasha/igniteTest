@@ -1,3 +1,5 @@
+package domain;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -56,7 +58,7 @@ public class TestObject implements Serializable {
 
     @Override
     public String toString() {
-        return "TestObject{" +
+        return "domain.TestObject{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

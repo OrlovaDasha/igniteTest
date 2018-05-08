@@ -1,10 +1,12 @@
+package examples;
+
+import domain.TestObject;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +49,8 @@ public class CollectionWriter {
             long start_time = System.nanoTime();
             for (Long i = 0L; i < 20; i++) {
                 for (TestObject testObject : testObjectList) {
-                    System.out.println(i + " " + testObject.id);
-                    cache.put(i + " " + testObject.id, testObject);
+                    System.out.println(i + " " + testObject.getId());
+                    cache.put(i + " " + testObject.getId(), testObject);
                 }
             }
             long end_time = System.nanoTime() - start_time;

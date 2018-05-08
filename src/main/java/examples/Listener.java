@@ -1,3 +1,5 @@
+package examples;
+
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteException;
@@ -29,7 +31,7 @@ public class Listener {
         Ignition.setClientMode(true);
         try (Ignite ignite = Ignition.start("example-ignite.xml")) {
             System.out.println();
-            System.out.println(">>> Cache events example started.");
+            System.out.println(">>> TestObjectCacheService events example started.");
 
             // Auto-close cache at the end of the example.
             try (IgniteCache<Integer, String> cache = ignite.getOrCreateCache(CACHE_NAME)) {
@@ -58,7 +60,7 @@ public class Listener {
                 System.out.println("Before listening");
 
                 // Subscribe to specified cache events on all nodes that have cache running.
-                // Cache events are explicitly enabled in examples/config/example-ignite.xml file.
+                // TestObjectCacheService events are explicitly enabled in examples/config/example-ignite.xml file.
                 ignite.events(ignite.cluster().forCacheNodes(CACHE_NAME)).remoteListen(locLsnr, null,
                         EVT_CACHE_OBJECT_PUT, EVT_CACHE_OBJECT_READ, EVT_CACHE_OBJECT_REMOVED);
 

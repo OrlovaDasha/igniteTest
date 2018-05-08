@@ -1,73 +1,21 @@
-import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteCache;
-import org.apache.ignite.IgniteDataStreamer;
 import org.apache.ignite.Ignition;
-import org.bson.Document;
-
-import java.util.List;
-import java.util.Properties;
+import services.MongoDBService;
+import utils.NatsClient;
+import utils.TestObjectCRUD;
 
 public class MongoDBWorker {
 
-    private static MongoClient client;
-    private static MongoDatabase db;
-    private static MongoCredential credential;
-    private static Properties properties;
-    private static final String CACHE_NAME = "test";
+    private final static String COLLECTION_NAME = "testObjects";
 
-    static {
-        properties = new Properties();
-        properties.setProperty("host", "localhost");
-        properties.setProperty("port", "27017");
-        properties.setProperty("dbname", "test");
-        properties.setProperty("login", "dasha");
-        properties.setProperty("password", "12345");
+    public static void main(String[] args) {
+        MongoDBService mongoDBService = new MongoDBService();
+        mongoDBService.connectToMongo();
+        Ignite ignite = Ignition.start("example-ignite.xml");
+        mongoDBService.init(ignite);
+        NatsClient natsClient = new NatsClient("test-cluster", "mongo");
+        mongoDBService.listenForQueries(natsClient, COLLECTION_NAME);
+        mongoDBService.listenForUpdates(natsClient, COLLECTION_NAME);
     }
-
-    private static void connectToMongo() {
-            client = new MongoClient(properties.getProperty("host"), Integer.valueOf(properties.getProperty("port")));
-            db = client.getDatabase(properties.getProperty("dbname"));
-            credential = MongoCredential.createCredential(properties.getProperty("login"),
-                    properties.getProperty("dbname"), properties.getProperty("password").toCharArray());
-    }
-
-        private static void init (Ignite ignite){
-            try (IgniteCache<Long, TestObject> cache = ignite.getOrCreateCache(CACHE_NAME)) {
-                try (IgniteDataStreamer<Long, TestObject> stream = ignite.dataStreamer(CACHE_NAME)) {
-                    for (String collectionName : db.listCollectionNames()) {
-                        MongoCollection collection = db.getCollection(collectionName);
-                        TestObjectCRUD testObjectCRUD = new TestObjectCRUD();
-                        testObjectCRUD.setTable(collection);
-                        stream.addData(testObjectCRUD.getAll());
-                    }
-                }
-            }
-        }
-
-        private static void create () {
-            MongoCollection collection = db.getCollection("testObjects");
-            TestObjectCRUD testObjectCRUD = new TestObjectCRUD();
-            testObjectCRUD.setTable(collection);
-
-            for (Long i = 0L; i < 1_000_000; i++) {
-                testObjectCRUD.add(new TestObject(i, "name" + i, "description"));
-            }
-        }
-
-        public static void main (String[]args){
-            connectToMongo();
-            NatsExample natsExample = new NatsExample("test-cluster", "publisher");
-            MongoCollection collection = db.getCollection("testObjects");
-            collection.watch().forEach(new Block<ChangeStreamDocument<Document>>() {
-                @Override
-                public void apply(ChangeStreamDocument<Document> documentChangeStreamDocument) {
-                    TestObject testObject = TestObjectCRUD.fromDocument(documentChangeStreamDocument.getFullDocument());
-                    natsExample.publish("foo", testObject);
-                }
-            });
-        }
-    }
+}

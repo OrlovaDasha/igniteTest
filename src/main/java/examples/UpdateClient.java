@@ -1,3 +1,6 @@
+package examples;
+
+import domain.TestObject;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteDataStreamer;

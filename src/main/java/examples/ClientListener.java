@@ -1,13 +1,13 @@
+package examples;
+
+import domain.TestObject;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
-import org.apache.ignite.IgniteDataStreamer;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
-import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.lang.IgniteBiPredicate;
-import org.apache.ignite.stream.StreamVisitor;
 
 import javax.cache.Cache;
 import javax.cache.event.CacheEntryEvent;
