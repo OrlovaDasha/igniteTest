@@ -44,6 +44,8 @@ public class NatsClient {
             ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream);
             outputStream.writeObject(object);
             this.sc.publish(subject, byteArrayOutputStream.toByteArray());
+            outputStream.close();
+            byteArrayOutputStream.close();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -55,6 +57,8 @@ public class NatsClient {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(message.getData());
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             object =  objectInputStream.readObject();
+            objectInputStream.close();
+            byteArrayInputStream.close();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
