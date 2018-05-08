@@ -13,7 +13,7 @@ public class MongoDBWorker {
         MongoDBService mongoDBService = new MongoDBService();
         mongoDBService.connectToMongo();
         Ignite ignite = Ignition.start("example-ignite.xml");
-        mongoDBService.init(ignite);
+       // mongoDBService.init(ignite);
         NatsClient natsClient = new NatsClient("test-cluster", "mongo");
         mongoDBService.listenForQueries(natsClient, COLLECTION_NAME);
         mongoDBService.listenForUpdates(natsClient, COLLECTION_NAME);

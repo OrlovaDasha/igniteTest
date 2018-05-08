@@ -30,13 +30,14 @@ public class GuavaCacheWorker {
         LoadingCache<Long, TestObject> cache = testObjectCacheService.getCache();
 
         long startTime = System.nanoTime();
-        TestObject value = cache.get(1L);
+        TestObject value = cache.get(8L);
         System.out.println(value);
         long endTime = System.nanoTime() - startTime;
         System.out.println("End reading = " + String.format("%.5f", endTime / (float) Math.pow(10, 9)));
 
+        //Thread.sleep(10000);
         startTime = System.nanoTime();
-        value = cache.get(1L);
+        value = cache.get(8L);
         System.out.println(value);
         endTime = System.nanoTime() - startTime;
         System.out.println("End reading = " + String.format("%.5f", endTime / (float) Math.pow(10, 9)));

@@ -15,6 +15,8 @@ import javax.cache.event.CacheEntryEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class TestObjectCacheService {
     private LoadingCache<Long, TestObject> cache;
@@ -24,17 +26,34 @@ public class TestObjectCacheService {
     public void createCache(Ignite ignite) {
         NatsClient natsClient = new NatsClient("test-cluster", "subscriber");
         igniteCache = ignite.getOrCreateCache(CACHE_NAME);
+
+        natsClient.subscribe("toCache", message -> {
+            TestObject testObject = (TestObject) natsClient.geObjectFromMessage(message);
+            System.out.println("Received: " + testObject);
+            igniteCache.put(testObject.getId(), testObject);
+        });
+
         CacheLoader<Long, TestObject> loader = new CacheLoader<Long, TestObject>() {
             @Override
             public TestObject load(Long key) throws Exception {
                 TestObject value = igniteCache.get(key);
+                CountDownLatch doneSignal;
+                boolean done = false;
                 if (value == null) {
                     natsClient.publish("fromCache", key);
+                    doneSignal = new CountDownLatch(1);
                     natsClient.subscribe("result", message -> {
                         TestObject testObject = (TestObject) natsClient.geObjectFromMessage(message);
-                        System.out.println("Received: " + testObject);
+                        System.out.println("Result received: " + testObject);
                         igniteCache.put(testObject.getId(), testObject);
+                        doneSignal.countDown();
                     });
+                    done = doneSignal.await(1000, TimeUnit.MILLISECONDS);
+                    if (done) {
+                        value = igniteCache.get(key);
+                    } else {
+                        value = new TestObject(null, null, null);
+                    }
                 }
                 return value;
             }
@@ -49,12 +68,6 @@ public class TestObjectCacheService {
             }
         });
        igniteCache.query(continuousQuery).forEach(entry -> cache.put(entry.getKey(), entry.getValue()));
-
-       natsClient.subscribe("toCache", message -> {
-                TestObject testObject = (TestObject) natsClient.geObjectFromMessage(message);
-                System.out.println("Received: " + testObject);
-                igniteCache.put(testObject.getId(), testObject);
-        });
     }
 
     public LoadingCache<Long, TestObject> getCache() {
