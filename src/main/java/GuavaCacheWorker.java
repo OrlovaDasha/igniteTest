@@ -21,20 +21,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GuavaCacheWorker {
-    public static LoadingCache<Long, List<TestObject>> cache;
+    public static LoadingCache<Long, TestObject> cache;
     public static final String CACHE_NAME = "test";
-    public static ContinuousQuery<Long, List<TestObject>> continuousQuery = new ContinuousQuery<>();
+    public static ContinuousQuery<Long, TestObject> continuousQuery = new ContinuousQuery<>();
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Ignition.setClientMode(true);
         try (Ignite ignite = Ignition.start("example-ignite.xml")) {
-            try (IgniteCache<Long, List<TestObject>> igniteCache = ignite.getOrCreateCache(CACHE_NAME)) {
-                CacheLoader<Long, List<TestObject>> loader = new CacheLoader<Long, List<TestObject>>() {
+            try (IgniteCache<Long, TestObject> igniteCache = ignite.getOrCreateCache(CACHE_NAME)) {
+                CacheLoader<Long, TestObject> loader = new CacheLoader<Long, TestObject>() {
                     @Override
-                    public List<TestObject> load(Long key) throws Exception {
-                        List<TestObject> value = igniteCache.get(key);
+                    public TestObject load(Long key) throws Exception {
+                        TestObject value = igniteCache.get(key);
                         if (value == null)  {
-                            value = Collections.EMPTY_LIST;
+                            value = new TestObject(null, null, null);
                         }
                         return value;
                     }
@@ -44,22 +44,22 @@ public class GuavaCacheWorker {
 
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 Runnable runnable = () -> {
-                    continuousQuery.setInitialQuery(new ScanQuery<>(new IgniteBiPredicate<Long, List<TestObject>>() {
+                    continuousQuery.setInitialQuery(new ScanQuery<>(new IgniteBiPredicate<Long,TestObject>() {
                         @Override
-                        public boolean apply(Long aLong, List<TestObject> testObject) {
+                        public boolean apply(Long aLong, TestObject testObject) {
                             return true;
                         }
                     }));
-                    continuousQuery.setLocalListener(new CacheEntryUpdatedListener<Long, List<TestObject>>() {
+                    continuousQuery.setLocalListener(new CacheEntryUpdatedListener<Long, TestObject>() {
                         @Override
-                        public void onUpdated(Iterable<CacheEntryEvent<? extends Long, ? extends List<TestObject>>> iterable) throws CacheEntryListenerException {
-                            for (CacheEntryEvent<? extends Long, ? extends List<TestObject>> e : iterable) {
+                        public void onUpdated(Iterable<CacheEntryEvent<? extends Long, ? extends TestObject>> iterable) throws CacheEntryListenerException {
+                            for (CacheEntryEvent<? extends Long, ? extends TestObject> e : iterable) {
                                 cache.put(e.getKey(), e.getValue());
                                 System.out.println("Updated = [" + e.getKey() + " " + e.getEventType() + " " + e.getOldValue() + " " + e.getValue());
                             }
                         }
                     });
-                    try (QueryCursor<javax.cache.Cache.Entry<Long, List<TestObject>>> cur = igniteCache.query(continuousQuery)) {
+                    try (QueryCursor<javax.cache.Cache.Entry<Long, TestObject>> cur = igniteCache.query(continuousQuery)) {
                         Thread.sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -68,7 +68,7 @@ public class GuavaCacheWorker {
                 executorService.submit(runnable);
 
                 long startTime = System.nanoTime();
-                List<TestObject> value = cache.get(1L);
+                TestObject value = cache.get(1L);
                 System.out.println(value);
                 long endTime = System.nanoTime() - startTime;
                 System.out.println("End reading = " + String.format("%.5f", endTime / (float) Math.pow(10, 9)));

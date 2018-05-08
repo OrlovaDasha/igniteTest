@@ -1,7 +1,6 @@
 import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -9,9 +8,8 @@ import org.apache.ignite.IgniteDataStreamer;
 import org.apache.ignite.Ignition;
 import org.bson.Document;
 
-import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 public class MongoDBWorker {
 
@@ -61,16 +59,15 @@ public class MongoDBWorker {
         }
 
         public static void main (String[]args){
-            Block<ChangeStreamDocument<Document>> printBlock = new Block<ChangeStreamDocument<Document>>() {
+            connectToMongo();
+            NatsExample natsExample = new NatsExample("test-cluster", "publisher");
+            MongoCollection collection = db.getCollection("testObjects");
+            collection.watch().forEach(new Block<ChangeStreamDocument<Document>>() {
                 @Override
                 public void apply(ChangeStreamDocument<Document> documentChangeStreamDocument) {
-                    System.out.println(documentChangeStreamDocument);
+                    TestObject testObject = TestObjectCRUD.fromDocument(documentChangeStreamDocument.getFullDocument());
+                    natsExample.publish("foo", testObject);
                 }
-            };
-
-            connectToMongo();
-            //Ignite ignite = Ignition.start("example-ignite.xml"))
-            MongoCollection collection = db.getCollection("testObjects");
-            collection.watch().forEach(printBlock);
+            });
         }
     }

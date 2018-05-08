@@ -55,4 +55,12 @@ public class TestObjectCRUD {
         }
         return testObjectMap;
     }
+
+    public static TestObject fromDocument(Document document) {
+        TestObject testObject = new TestObject();
+        testObject.setId(Long.valueOf(String.valueOf(document.get("id"))));
+        testObject.setName(String.valueOf(document.get("name")));
+        testObject.setDescription(String.valueOf(document.get("description")));
+        return testObject;
+    }
 }

@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.Objects;
 
-public class TestObject {
+public class TestObject implements Serializable {
     Long id;
     String name;
     String description;
