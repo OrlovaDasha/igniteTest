@@ -71,17 +71,11 @@ public class MongoDBService {
     public void listenForQueries(NatsClient nats, String collectionName) {
         MongoCollection collection = db.getCollection(collectionName);
         nats.subscribe("fromCache", message -> {
-            try {
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(message.getData());
-                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                Long id = (Long) objectInputStream.readObject();
+                Long id = (Long) nats.geObjectFromMessage(message);
                 TestObjectCRUD testObjectCRUD = new TestObjectCRUD();
                 testObjectCRUD.setTable(collection);
                 TestObject testObject = testObjectCRUD.getById(id);
-                nats.publish("toCache", testObject);
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+                nats.publish("result", testObject);
         });
     }
 

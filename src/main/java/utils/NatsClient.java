@@ -1,7 +1,8 @@
 package utils;
 
+import domain.TestObject;
 import io.nats.client.Connection;
-import io.nats.client.Message;
+import io.nats.streaming.Message;
 import io.nats.client.NATSException;
 import io.nats.client.Nats;
 import io.nats.streaming.*;
@@ -46,6 +47,18 @@ public class NatsClient {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public Object geObjectFromMessage(Message message) {
+        Object object = null;
+        try {
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(message.getData());
+            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+            object =  objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return object;
     }
 
 

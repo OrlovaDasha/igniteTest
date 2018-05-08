@@ -29,7 +29,12 @@ public class TestObjectCacheService {
             public TestObject load(Long key) throws Exception {
                 TestObject value = igniteCache.get(key);
                 if (value == null) {
-                    value = new TestObject(null, null, null);
+                    natsClient.publish("fromCache", key);
+                    natsClient.subscribe("result", message -> {
+                        TestObject testObject = (TestObject) natsClient.geObjectFromMessage(message);
+                        System.out.println("Received: " + testObject);
+                        igniteCache.put(testObject.getId(), testObject);
+                    });
                 }
                 return value;
             }
@@ -46,15 +51,9 @@ public class TestObjectCacheService {
        igniteCache.query(continuousQuery).forEach(entry -> cache.put(entry.getKey(), entry.getValue()));
 
        natsClient.subscribe("toCache", message -> {
-            try {
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(message.getData());
-                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                TestObject testObject = (TestObject) objectInputStream.readObject();
+                TestObject testObject = (TestObject) natsClient.geObjectFromMessage(message);
                 System.out.println("Received: " + testObject);
                 igniteCache.put(testObject.getId(), testObject);
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
         });
     }
 
